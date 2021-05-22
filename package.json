@@ -1,0 +1,51 @@
+{
+  "name": "vite-react-jsx",
+  "version": "0.0.0",
+  "description": "React automatic JSX runtime",
+  "author": "Alec Larson",
+  "license": "MIT",
+  "repository": "alloc/vite-react-jsx",
+  "main": "dist/plugin.js",
+  "module": "dist/plugin.mjs",
+  "exports": {
+    "import": "./dist/plugin.mjs",
+    "require": "./dist/plugin.js"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "build": "rimraf dist && tsup src/plugin.ts --sourcemap --dts --format cjs,esm",
+    "prepare": "yarn build"
+  },
+  "peerDependencies": {
+    "vite": ">2.0.0-0"
+  },
+  "devDependencies": {
+    "@alloc/fast-rimraf": "^1.0.8",
+    "@alloc/prettier-config": "^1.0.0",
+    "@types/babel__core": "^7.1.14",
+    "@types/node": "^14.14.20",
+    "@types/resolve": "^1.20.0",
+    "prettier": "^2.0.5",
+    "tsup": "^4.11.0",
+    "typescript": "^4.0.0",
+    "vite": "latest"
+  },
+  "prettier": "@alloc/prettier-config",
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "react",
+    "react17",
+    "jsx",
+    "runtime"
+  ],
+  "dependencies": {
+    "@babel/core": "^7.14.3",
+    "@babel/plugin-syntax-jsx": "^7.12.13",
+    "@babel/plugin-transform-react-jsx": "^7.14.3",
+    "resolve": "^1.20.0"
+  }
+}
