@@ -1,0 +1,7 @@
+{
+  "files": ["index.tsx"],
+  "compilerOptions": {
+    "jsx": "react",
+    "esModuleInterop": true
+  }
+}
