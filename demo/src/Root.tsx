@@ -1,7 +1,15 @@
 import { useState } from 'react'
+
+// This local package uses the automatic JSX runtime in a .jsx module
 import One from 'react-one'
+
+// This local package uses `import React from 'react'` in a .tsx module
 import Two from 'react-two'
+
+// This package has a minified CJS entry point and a development module
 import Switch from 'react-switch'
+
+// This package has a ESM entry point
 import Dropzone from 'react-dropzone'
 
 export const Root = () => {
