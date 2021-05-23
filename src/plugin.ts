@@ -30,7 +30,7 @@ export default (): Plugin => {
   }
 }
 
-function getBuildPlugin(config: ResolvedConfig): Plugin {
+function getBuildPlugin(config: ResolvedConfig): Omit<Plugin, 'name'> {
   const babelImport = import('@babel/core')
   const babelTransformJsx = import('@babel/plugin-transform-react-jsx')
 
@@ -40,7 +40,6 @@ function getBuildPlugin(config: ResolvedConfig): Plugin {
   })
 
   return {
-    name: 'vite:react-jsx',
     resolveId: id => (id === runtimeId ? id : null),
     load(id) {
       if (id === runtimeId) {
