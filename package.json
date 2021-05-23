@@ -5,19 +5,19 @@
   "author": "Alec Larson",
   "license": "MIT",
   "repository": "alloc/vite-react-jsx",
-  "main": "dist/plugin.js",
-  "module": "dist/plugin.mjs",
+  "main": "dist/cjs/plugin.js",
+  "module": "dist/esm/plugin.js",
   "exports": {
-    "import": "./dist/plugin.mjs",
-    "require": "./dist/plugin.js"
+    "import": "./dist/esm/plugin.js",
+    "require": "./dist/cjs/plugin.js"
   },
   "files": [
     "src",
     "dist"
   ],
   "scripts": {
-    "build": "rimraf dist && tsup src/plugin.ts --sourcemap --dts --format cjs,esm",
-    "prepare": "yarn build"
+    "build": "rimraf dist && tsc -p . --outDir dist/esm && tsc -p . --module commonjs --outDir dist/cjs",
+    "prepublishOnly": "yarn build"
   },
   "peerDependencies": {
     "vite": ">2.0.0-0"
@@ -29,7 +29,6 @@
     "@types/node": "^14.14.20",
     "@types/resolve": "^1.20.0",
     "prettier": "^2.0.5",
-    "tsup": "^4.11.0",
     "typescript": "^4.0.0",
     "vite": "latest"
   },
