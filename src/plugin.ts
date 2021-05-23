@@ -3,9 +3,7 @@ import type { NodePath, PluginItem } from '@babel/core'
 import type { ImportDeclaration, ImportSpecifier } from '@babel/types'
 import resolve from 'resolve'
 
-type PluginConfig = {}
-
-export default (config: PluginConfig = {}): Plugin => {
+export default (): Plugin => {
   return {
     name: 'vite:react-jsx',
     enforce: 'pre',
