@@ -9,6 +9,11 @@ export default (config: PluginConfig = {}): Plugin => {
   return {
     name: 'vite:react-jsx',
     enforce: 'pre',
+    config: () => ({
+      resolve: {
+        dedupe: ['react', 'react-dom'],
+      },
+    }),
     configResolved(config) {
       if (config.command === 'build') {
         const babelImport = import('@babel/core')
