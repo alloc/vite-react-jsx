@@ -1,7 +1,7 @@
-import type { Plugin } from 'vite'
-import type { TransformOptions } from '@babel/core'
+import type { Plugin, ResolvedConfig } from 'vite'
+import type { NodePath, PluginItem } from '@babel/core'
+import type { ImportDeclaration, ImportSpecifier } from '@babel/types'
 import resolve from 'resolve'
-import path from 'path'
 
 type PluginConfig = {}
 
@@ -16,156 +16,7 @@ export default (config: PluginConfig = {}): Plugin => {
     }),
     configResolved(config) {
       if (config.command === 'build') {
-        const babelImport = import('@babel/core')
-        const babelJsxSyntax = import('@babel/plugin-syntax-jsx')
-        const babelTransformJsx = import('@babel/plugin-transform-react-jsx')
-        const babelRestoreJsx = import('./restore-jsx')
-
-        const runtimeEntryId = '/@react-jsx-runtime'
-        const runtimePath = resolve.sync('react/jsx-runtime', {
-          basedir: config.root,
-        })
-        // const reactPath = resolve.sync('react', {
-        //   basedir: config.root,
-        // })
-
-        this.resolveId = id => (id === runtimeEntryId ? id : null)
-        this.load = function (id) {
-          if (id === runtimeEntryId) {
-            const exports = ['jsx', 'jsxs', 'Fragment'].join(',')
-            return `export {${exports}} from '${runtimePath}'`
-          }
-        }
-
-        // this.transform = async function (code, id) {
-        //   if (id.includes('/node_modules/') && /\.[tj]sx$/.test(id)) {
-        //     const babel = await babelImport
-        //     const result = await babel.transformAsync(code, {
-        //       plugins: [[await babelTransformJsx, { runtime: 'automatic' }]],
-        //       sourceMaps: config.build.sourcemap,
-        //     })
-        //     if (result?.code) {
-        //       return result as any
-        //     }
-        //   }
-        // }
-
-        let runtimeId: string
-
-        this.buildStart = function () {
-          runtimeId = this.emitFile({
-            id: runtimeEntryId,
-            type: 'chunk',
-            name: 'jsx-runtime',
-            preserveSignature: 'allow-extension',
-          })
-        }
-
-        this.renderChunk = async function (code, chunk) {
-          // Skip chunks without a `React.createElement` call.
-          if (!/\bReact(\$[0-9]+)?\.createElement\b/.test(code)) {
-            return null
-          }
-
-          // Ensure all `React.createElement` calls use the same React.
-          // Otherwise, the `babelRestoreJsx` plugin won't affect them.
-          code = code.replace(/\bReact\$[0-9]+\b/g, 'React')
-
-          // Strip "pure annotation" before each `React.createElement` call.
-          code = code.replace(/\/\* @__PURE__ \*\//g, '')
-
-          return transform(code, chunk.map, [
-            [babelJsxSyntax, babelRestoreJsx],
-            [[babelTransformJsx, { runtime: 'automatic' }]],
-            code =>
-              chunk.modules[runtimePath]
-                ? fixVendorImports(code)
-                : // Import jsx-runtime from the local chunk.
-                  code.replace(
-                    /"react\/jsx-runtime"/g,
-                    `"./${path.relative(
-                      config.build.assetsDir,
-                      this.getFileName(runtimeId)
-                    )}"`
-                  ),
-          ])
-        }
-
-        // Use jsx-runtime from the same chunk.
-        function fixVendorImports(code: string) {
-          const usedExports: string[] = []
-
-          code = code.replace(
-            /^import { (\w+)[^\n]+ "react\/jsx-runtime";/gm,
-            (_, name) => {
-              // Track which "react/jsx-runtime" exports are needed.
-              usedExports.push(name)
-              // These imports are circular, so remove them.
-              return ''
-            }
-          )
-
-          // After the jsx-runtime module is ready, declare a variable
-          // for each used export.
-          code = code.replace(
-            /(jsxRuntime\.exports = [\w\W]+?})/,
-            '$1 const' +
-              usedExports
-                .map(name => ` _${name} = jsxRuntime.exports.${name}`)
-                .join(',')
-          )
-
-          return code
-        }
-
-        async function transform(
-          code: string,
-          map: any,
-          pipeline: (any[] | ((code: string) => string))[]
-        ) {
-          const babel = await babelImport
-
-          let ast: any
-          for (let i = 0; i < pipeline.length; i++) {
-            const action = pipeline[i]
-
-            if (typeof action === 'function') {
-              ast = null
-              code = action(code)
-              continue
-            }
-
-            const generateAst = Array.isArray(pipeline[i + 1])
-            const options: TransformOptions = {
-              plugins: await Promise.all(
-                action.map(async plugin =>
-                  Array.isArray(plugin)
-                    ? [await plugin[0], plugin[1]]
-                    : plugin.default || plugin
-                )
-              ),
-              ast: generateAst,
-              code: !generateAst,
-              sourceMaps: config.build.sourcemap,
-              inputSourceMap: map || undefined,
-            }
-
-            const result = ast
-              ? await babel.transformFromAstAsync(ast, undefined, options)
-              : await babel.transformAsync(code, options)
-
-            if (!result) {
-              break
-            }
-            if (result.code) {
-              code = result.code
-            }
-            ast = result.ast
-            map = result.map
-          }
-
-          return { code, map }
-        }
+        Object.assign(this, getBuildPlugin(config))
       } else {
         const jsxRE = /\.[tj]sx$/
         const reactRE = /(^|\n)import React /
@@ -178,5 +29,146 @@ export default (config: PluginConfig = {}): Plugin => {
         }
       }
     },
+  }
+}
+
+function getBuildPlugin(config: ResolvedConfig): Plugin {
+  const babelImport = import('@babel/core')
+  const babelTransformJsx = import('@babel/plugin-transform-react-jsx')
+
+  const runtimeId = 'react/jsx-runtime'
+  const runtimePath = resolve.sync('react/jsx-runtime', {
+    basedir: config.root,
+  })
+
+  return {
+    name: 'vite:react-jsx',
+    resolveId: id => (id === runtimeId ? id : null),
+    load(id) {
+      if (id === runtimeId) {
+        const exports = ['jsx', 'jsxs', 'Fragment']
+        return [
+          `import * as jsxRuntime from '${runtimePath}'`,
+          // We can't use `export * from` or else any callsite that uses
+          // this module will be compiled to `jsxRuntime.exports.jsx`
+          // instead of the more concise `jsx` alias.
+          ...exports.map(name => `export const ${name} = jsxRuntime.${name}`),
+        ].join('\n')
+      }
+    },
+    async transform(code, id) {
+      if (/.+\/node_modules\/.+\.jsx?$/.test(id)) {
+        let match = code.match(
+          /\b(var|let|const) +(\w+) *= *require\(["']react["']\)/
+        )
+        if (match) {
+          return nodeModulesTransform(code, match[2], true)
+        }
+        match = code.match(/^import (\w+).+? from ["']react["']/m)
+        if (match) {
+          return nodeModulesTransform(code, match[1])
+        }
+      } else if (/\.[tj]sx$/.test(id)) {
+        const babel = await babelImport
+        const res = await babel.transformAsync(code, {
+          plugins: [[await babelTransformJsx, { runtime: 'automatic' }]],
+          sourceMaps: config.build.sourcemap,
+        })
+        if (res?.code) {
+          return {
+            code: res.code,
+            map: res.map,
+          }
+        }
+      }
+    },
+  }
+
+  async function nodeModulesTransform(
+    code: string,
+    reactAlias: string,
+    isCommonJS?: boolean
+  ) {
+    const reactJsxRE = new RegExp(
+      '\\b' + reactAlias + '\\.(createElement|Fragment)\\b',
+      'g'
+    )
+
+    let hasCompiledJsx = false
+    code = code.replace(reactJsxRE, (_, prop) => {
+      hasCompiledJsx = true
+      // Replace with "React" so JSX can be reverse compiled.
+      return 'React.' + prop
+    })
+
+    // Assume node_modules never contains uncompiled JSX.
+    if (!hasCompiledJsx) {
+      return
+    }
+
+    // Support modules that use `import {Fragment} from 'react'`
+    code = code.replace(
+      /createElement\(Fragment,/g,
+      'createElement(React.Fragment,'
+    )
+
+    const babel = await babelImport
+
+    // Restore JSX from React.createElement calls
+    let res = await babel.transformAsync(code, {
+      ast: true,
+      code: false,
+      plugins: await Promise.all([
+        import('@babel/plugin-syntax-jsx').then(mod => mod.default),
+        import('./restore-jsx'),
+      ]),
+    })
+
+    // Then apply the JSX automatic runtime transform
+    if (res?.ast) {
+      const plugins: PluginItem[] = [
+        [await babelTransformJsx, { runtime: 'automatic' }],
+      ]
+      if (isCommonJS) {
+        // Replace this:
+        //    import { jsx as _jsx } from "react/jsx-runtime"
+        // with this:
+        //    var _jsx = require("react/jsx-runtime").jsx
+        plugins.push(babelImportToRequire)
+      }
+      res = await babel.transformFromAstAsync(res.ast, undefined, {
+        plugins,
+        sourceMaps: config.build.sourcemap,
+      })
+      if (res?.code) {
+        return {
+          code: res.code,
+          map: res.map,
+        }
+      }
+    }
+  }
+
+  function babelImportToRequire({ types: t }: typeof import('@babel/core')) {
+    return {
+      visitor: {
+        ImportDeclaration(path: NodePath) {
+          const decl = path.node as ImportDeclaration
+          const spec = decl.specifiers[0] as ImportSpecifier
+
+          path.replaceWith(
+            t.variableDeclaration('var', [
+              t.variableDeclarator(
+                spec.local,
+                t.memberExpression(
+                  t.callExpression(t.identifier('require'), [decl.source]),
+                  spec.imported
+                )
+              ),
+            ])
+          )
+        },
+      },
+    }
   }
 }
