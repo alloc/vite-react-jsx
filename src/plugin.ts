@@ -21,7 +21,7 @@ export default (config: PluginConfig = {}): Plugin => {
         const jsxRE = /\.[tj]sx$/
         const reactRE = /(^|\n)import React /
 
-        // Just use React.createElement in dev mode
+        // Just use React.createElement in serve mode
         this.transform = function (code, id) {
           if (jsxRE.test(id) && !reactRE.test(code)) {
             return `import React from 'react'; ` + code
