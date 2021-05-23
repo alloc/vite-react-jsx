@@ -1,6 +1,11 @@
+/**
+ * https://github.com/flying-sheep/babel-plugin-transform-react-createelement-to-jsx
+ * @license GNU General Public License v3.0
+ */
 import * as babel from '@babel/core'
 
-/** Visitor factory for babel, converting React.createElement(...) to <jsx ...>...</jsx>
+/**
+ * Visitor factory for babel, converting React.createElement(...) to <jsx ...>...</jsx>
  *
  * What we want to handle here is this CallExpression:
  *
@@ -10,10 +15,13 @@ import * as babel from '@babel/core'
  *       [...children: StringLiteral|Expression]
  *     )
  *
- * Any of those arguments might also be missing (undefined) and/or invalid. */
+ * Any of those arguments might also be missing (undefined) and/or invalid.
+ */
 export default function ({ types: t }: typeof babel): babel.PluginObj {
-  /** Get a JSXElement from a CallExpression
-   * Returns null if this impossible */
+  /**
+   * Get a `JSXElement` from a `CallExpression`.
+   * Returns `null` if this impossible.
+   */
   function getJSXNode(node: any): any {
     if (!isReactCreateElement(node)) {
       return null
@@ -58,8 +66,10 @@ export default function ({ types: t }: typeof babel): babel.PluginObj {
     return t.jsxElement(startTag, endTag, children, selfClosing)
   }
 
-  /** Get a JSXIdentifier or JSXMemberExpression from a Node of known type.
-   * Returns null if a unknown node type, null or undefined is passed. */
+  /**
+   * Get a JSXIdentifier or JSXMemberExpression from a Node of known type.
+   * Returns null if a unknown node type, null or undefined is passed.
+   */
   function getJSXName(node: any): any {
     if (node == null) {
       return null
@@ -81,9 +91,11 @@ export default function ({ types: t }: typeof babel): babel.PluginObj {
     return t.jsxMemberExpression(object, property)
   }
 
-  /** Get a array of JSX(Spread)Attribute from a props ObjectExpression.
+  /**
+   * Get a array of JSX(Spread)Attribute from a props ObjectExpression.
    * Handles the _extends Expression babel creates from SpreadElement nodes.
-   * Returns null if a validation error occurs. */
+   * Returns null if a validation error occurs.
+   */
   function getJSXProps(node: any): any[] | null {
     if (node == null || isNullLikeNode(node)) {
       return []
@@ -163,7 +175,9 @@ export default function ({ types: t }: typeof babel): babel.PluginObj {
     return null
   }
 
-  /** tests if a node is a CallExpression with callee “React.createElement” */
+  /**
+   * Tests if a node is a CallExpression with callee `React.createElement`
+   */
   const isReactCreateElement = (node: any) =>
     t.isCallExpression(node) &&
     t.isMemberExpression(node.callee) &&
@@ -171,11 +185,15 @@ export default function ({ types: t }: typeof babel): babel.PluginObj {
     t.isIdentifier(node.callee.property, { name: 'createElement' }) &&
     !node.callee.computed
 
-  /** Tests if a node is “null” or “undefined” */
+  /**
+   * Tests if a node is `null` or `undefined`
+   */
   const isNullLikeNode = (node: any) =>
     t.isNullLiteral(node) || t.isIdentifier(node, { name: 'undefined' })
 
-  /** Tests if a node is an object expression with noncomputed, nonmethod attrs */
+  /**
+   * Tests if a node is an object expression with noncomputed, nonmethod attrs
+   */
   const isPlainObjectExpression = (node: any) =>
     t.isObjectExpression(node) &&
     node.properties.every(

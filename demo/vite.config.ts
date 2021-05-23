@@ -4,9 +4,14 @@ import type { UserConfig } from 'vite'
 
 const config: UserConfig = {
   plugins: [reactRefresh(), reactJsx()],
+  // Removing this line will break the bundle, because react-switch
+  // is pre-minified and therefore is not supported.
+  mode: 'development',
   build: {
-    sourcemap: true,
+    // The minified bundle works as expected.
     minify: false,
+    // Source maps are generated properly.
+    sourcemap: true,
   },
 }
 
