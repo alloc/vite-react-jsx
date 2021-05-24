@@ -16,6 +16,21 @@
 
 &nbsp;
 
+### FAQ
+
+- **What are the benefits of using the new JSX runtime?**  
+  1) You don't need to `import React` manually anymore.  
+  2) Better performance now and in the future. The [Motivations](https://github.com/reactjs/rfcs/blob/createlement-rfc/text/0000-create-element-changes.md#motivation) section in the RFC explains the specifics of performance issues with `React.createElement`.  
+  3) In the future, you won't need `React.forwardRef` anymore.  
+  4) Depending on your setup, slightly smaller bundle sizes (according to the React team).  
+  5) Faster parsing of JavaScript by web browser (`.createElement` cannot be minified).
+
+- **How much does this affect Vite's performance?**  
+  In serve mode, the performance effects are unnoticeable, since Babel is only used when bundling.  
+  Otherwise, you'll see ~40% longer build times in the `./demo` folder, but this % largely depends on how many kB of JavaScript need to be parsed and transformed by Babel.
+
+&nbsp;
+
 ### Usage
 
 ```ts
