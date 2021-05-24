@@ -66,9 +66,16 @@ function getBuildPlugin(config: ResolvedConfig): Omit<Plugin, 'name'> {
           return nodeModulesTransform(code, match[1])
         }
       } else if (/\.[tj]sx$/.test(id)) {
+        const syntaxPlugins: PluginItem[] = []
+        if (id.endsWith('.tsx')) {
+          syntaxPlugins.push(await babelTSX())
+        }
         const babel = await babelImport
         const res = await babel.transformAsync(code, {
-          plugins: [[await babelTransformJsx, { runtime: 'automatic' }]],
+          plugins: [
+            ...syntaxPlugins,
+            [await babelTransformJsx, { runtime: 'automatic' }],
+          ],
           sourceMaps: config.build.sourcemap,
         })
         if (res?.code) {
@@ -79,6 +86,13 @@ function getBuildPlugin(config: ResolvedConfig): Omit<Plugin, 'name'> {
         }
       }
     },
+  }
+
+  async function babelTSX() {
+    return [
+      await import('@babel/plugin-syntax-typescript').then(m => m.default),
+      { isTSX: true },
+    ]
   }
 
   async function nodeModulesTransform(
