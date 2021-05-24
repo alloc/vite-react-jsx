@@ -29,6 +29,9 @@
   In serve mode, the performance effects are unnoticeable, since Babel is only used when bundling.  
   Otherwise, you'll see ~40% longer build times in the `./demo` folder, but this % largely depends on how many kB of JavaScript need to be parsed and transformed by Babel.
 
+- **Do I need React 17+ to use the new JSX runtime?**  
+  No. Support for the new runtime was backported to React 16.14.0, React 15.7.0, and React 0.14.10.
+
 &nbsp;
 
 ### Usage
