@@ -5,6 +5,7 @@ specifiers:
   '@alloc/prettier-config': ^1.0.0
   '@babel/core': ^7.14.3
   '@babel/plugin-syntax-jsx': ^7.12.13
+  '@babel/plugin-syntax-typescript': ^7.12.13
   '@babel/plugin-transform-react-jsx': ^7.14.3
   '@types/babel__core': ^7.1.14
   '@types/node': ^14.14.20
@@ -17,6 +18,7 @@ specifiers:
 dependencies:
   '@babel/core': 7.14.3
   '@babel/plugin-syntax-jsx': 7.12.13_@babel+core@7.14.3
+  '@babel/plugin-syntax-typescript': 7.12.13_@babel+core@7.14.3
   '@babel/plugin-transform-react-jsx': 7.14.3_@babel+core@7.14.3
   resolve: 1.20.0
 
@@ -206,6 +208,15 @@ packages:
 
   /@babel/plugin-syntax-jsx/7.12.13_@babel+core@7.14.3:
     resolution: {integrity: sha512-d4HM23Q1K7oq/SLNmG6mRt85l2csmQ0cHRaxRXjKW0YFdEXqlZ5kzFQKH5Uc3rDJECgu+yCRgPkG04Mm98R/1g==}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/core': 7.14.3
+      '@babel/helper-plugin-utils': 7.13.0
+    dev: false
+
+  /@babel/plugin-syntax-typescript/7.12.13_@babel+core@7.14.3:
+    resolution: {integrity: sha512-cHP3u1JiUiG2LFDKbXnwVad81GvfyIOmCD6HIEId6ojrY0Drfy2q1jw7BwN7dE84+kTnBjLkXoL3IEy/3JPu2w==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
