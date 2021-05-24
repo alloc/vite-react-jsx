@@ -76,7 +76,7 @@ function getBuildPlugin(config: ResolvedConfig): Omit<Plugin, 'name'> {
             ...syntaxPlugins,
             [await babelTransformJsx, { runtime: 'automatic' }],
           ],
-          sourceMaps: config.build.sourcemap,
+          sourceMaps: !!config.build.sourcemap,
         })
         if (res?.code) {
           return {
