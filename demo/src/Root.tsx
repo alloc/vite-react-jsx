@@ -7,7 +7,7 @@ import One from 'react-one'
 import Two from 'react-two'
 
 // This package has a minified CJS entry point and a development module
-import Switch from 'react-switch'
+import { Switch } from './deps'
 
 // This package has a ESM entry point
 import Dropzone from 'react-dropzone'
