@@ -1,6 +1,6 @@
 {
   "name": "vite-react-jsx",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "React 17's automatic JSX runtime for your entire bundle",
   "author": "Alec Larson",
   "license": "MIT",
