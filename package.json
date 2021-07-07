@@ -18,7 +18,7 @@
   "scripts": {
     "build": "rimraf dist && tsc -p . --outDir dist/esm && tsc -p . --module commonjs --outDir dist/cjs",
     "prepublishOnly": "yarn build",
-    "postinstall": "yarn build"
+    "postinstall": "yarn && yarn build"
   },
   "peerDependencies": {
     "vite": ">2.0.0-0"
