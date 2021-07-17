@@ -1,8 +1,37 @@
 {
-  "extends": "../tsconfig.json",
-  "include": ["src", "vite.config.ts"],
   "compilerOptions": {
+    "rootDir": ".",
+    "baseUrl": ".",
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "jsx": "react-jsx",
-    "lib": ["dom", "es2018"]
-  }
+    "noEmit": true,
+    "alwaysStrict": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "esModuleInterop": false,
+    "declaration": true,
+    "allowJs": false,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noUnusedLocals": true,
+    "downlevelIteration": true,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["./src"],
+  "exclude": ["node_modules"]
 }
