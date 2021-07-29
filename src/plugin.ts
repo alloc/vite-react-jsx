@@ -71,7 +71,7 @@ function getTransformer(opts: { sourceMaps?: boolean }) {
       const babel = await babelImport
 
       // Reverse-compile any React.createElement calls
-      let [ast, isCommonJS] = await viteReactJsx.restoreJSX(babel, code)
+      let [ast, isCommonJS] = await viteReactJsx.restoreJSX(babel, code, id)
 
       // Then apply the JSX automatic runtime transform
       if (ast) {
@@ -84,6 +84,7 @@ function getTransformer(opts: { sourceMaps?: boolean }) {
         const result = await babel.transformFromAstAsync(ast, undefined, {
           plugins,
           sourceMaps: opts.sourceMaps,
+          filename: id
         })
         if (result?.code) {
           return {
@@ -104,6 +105,7 @@ function getTransformer(opts: { sourceMaps?: boolean }) {
           [await babelTransformJsx, { runtime: 'automatic' }],
         ],
         sourceMaps: opts.sourceMaps,
+        filename: id
       })
       if (res?.code) {
         return {
@@ -129,7 +131,8 @@ let babelRestoreJSX: any
 /** Restore JSX from `React.createElement` calls */
 async function restoreJSX(
   babel: typeof import('@babel/core'),
-  code: string
+  code: string,
+  id: string
 ): Promise<RestoredJSX> {
   const [reactAlias, isCommonJS] = parseReactAlias(code)
   const reactJsxRE = new RegExp(
@@ -163,6 +166,7 @@ async function restoreJSX(
       plugins: ['jsx'],
     },
     plugins: [await babelRestoreJSX],
+    filename: id
   })
 
   return [result?.ast, isCommonJS]
