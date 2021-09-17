@@ -20,7 +20,7 @@ export default function viteReactJsx(): Plugin {
         })
       } else {
         const jsxRE = /\.[tj]sx$/
-        const reactRE = /((^|\n)import React[ ,]|(^|\n)import \* as React[ ,])/
+        const reactRE = /((^|\n)import React[ ,]|(^|\n)import \* as React[ ,]/
 
         // Just use React.createElement in serve mode
         this.transform = function (code, id) {
