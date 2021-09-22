@@ -1,3 +1,5 @@
+### ⚠️ Deprecated: Use [`@vitejs/plugin-react`](https://www.npmjs.com/package/@vitejs/plugin-react) instead.
+
 # vite-react-jsx
 
 [![npm](https://img.shields.io/npm/v/vite-react-jsx.svg)](https://www.npmjs.com/package/vite-react-jsx)
